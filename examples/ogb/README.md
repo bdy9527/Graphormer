@@ -25,13 +25,13 @@ PHC-GNN          | 111K    | 79.34      |
 DeeperGCN-FLAG          | 532K    | 79.42      |
 DGN          | 114K    | 79.70      |
 Graphormer   | 47.0M   | **80.51**      |
-Graphormer + FPs   | 47.0M   | **80.51**      |
+Graphormer + FPs   | 47.0M   | **82.25**      |
 
 
 
 | Model                | Test ROC-AUC   | Valid ROC-AUC  | Parameters | Hardware          |
 | -------------------- | --------------- | --------------- | ---------- | ----------------- |
-| Graphormer + FPs | 0.8225 ± 0.0001 | 0.8396 ± 0.0001 | 47085378     | Tesla V100 (32GB) |
+| Graphormer + FPs | 82.25 ± 0.01 | 83.96 ± 0.01 | 47085378     | Tesla V100 (32GB) |
 
 
 ## Example Usage
