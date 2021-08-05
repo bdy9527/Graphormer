@@ -27,9 +27,11 @@ DGN          | 114K    | 79.70      |
 Graphormer   | 47.0M   | **80.51**      |
 Graphormer + FPs   | 47.0M   | **80.51**      |
 
+
+
 | Model                | Test ROC-AUC   | Valid ROC-AUC  | Parameters | Hardware          |
 | -------------------- | --------------- | --------------- | ---------- | ----------------- |
-| Graphormer + FPs | 0.8451 ± 0.0006 | 0.9132 ± 0.0010 | 47183040     | Tesla V100 (32GB) |
+| Graphormer + FPs | 0.8225 ± 0.0001 | 0.8396 ± 0.0001 | 47085378     | Tesla V100 (32GB) |
 
 
 ## Example Usage
@@ -64,6 +66,12 @@ Then, you can fine-tune our pre-trained model. we use fingerprints to smooth the
 bash hiv.sh
 ```
 You can change `seed` in `hiv.sh`, and run 10 times.
+
+Some hyper-parameters:
+
+```
+Namespace(accelerator='ddp', accumulate_grad_batches=1, amp_backend='native', amp_level='O2', attention_dropout_rate=0.1, auto_lr_find=False, auto_scale_batch_size=False, auto_select_gpus=False, batch_size=128, benchmark=False, check_val_every_n_epoch=1, checkpoint_callback=True, checkpoint_path='../../checkpoints/PCQM4M-LSC-epoch=192-valid_mae=0.1298.ckpt', dataset_name='ogbg-molhiv', default_root_dir='../../exps/hiv/hiv_flag/4', deterministic=False, distributed_backend=None, dropout_rate=0.1, edge_type='multi_hop', end_lr=1e-09, fast_dev_run=False, ffn_dim=768, flag=True, flag_m=2, flag_mag=0.0, flag_step_size=0.2, flush_logs_every_n_steps=100, gpus=2, gradient_clip_algorithm='norm', gradient_clip_val=0.0, hidden_dim=768, intput_dropout_rate=0.0, limit_predict_batches=1.0, limit_test_batches=1.0, limit_train_batches=1.0, limit_val_batches=1.0, log_every_n_steps=50, log_gpu_memory=None, logger=True, max_epochs=6, max_steps=645, max_time=None, min_epochs=None, min_steps=None, move_metrics_to_cpu=False, multi_hop_max_dist=5, multiple_trainloader_mode='max_size_cycle', n_layers=12, num_heads=32, num_nodes=1, num_processes=1, num_sanity_val_steps=2, num_workers=8, overfit_batches=0.0, peak_lr=0.0002, plugins=None, precision=16, prepare_data_per_node=True, process_position=0, profiler=None, progress_bar_refresh_rate=10, rel_pos_max=1024, reload_dataloaders_every_epoch=False, replace_sampler_ddp=True, resume_from_checkpoint=None, seed=4, stochastic_weight_avg=False, sync_batchnorm=False, terminate_on_nan=False, test=False, tot_updates=644, tpu_cores=None, track_grad_norm=-1, truncated_bptt_steps=None, val_check_interval=1.0, validate=False, warmup_updates=64, weight_decay=0.0, weights_save_path=None, weights_summary='top')
+```
 
 ## Citation
 Please kindly cite this paper if you use the code:
