@@ -118,7 +118,8 @@ class Graphormer(pl.LightningModule):
         edge_input, attn_edge_type = batched_data.edge_input, batched_data.attn_edge_type
         
         # rf_pred
-        mgf_maccs_pred = batched_data.y[:, 2]
+        if self.dataset_name == 'ogbg-molhiv':
+            mgf_maccs_pred = batched_data.y[:, 2]
         # graph_attn_bias
         n_graph, n_node = x.size()[:2]
         graph_attn_bias = attn_bias.clone()
@@ -248,8 +249,8 @@ class Graphormer(pl.LightningModule):
                 self.lr_schedulers().step()
         else:
             y_hat = self(batched_data).view(-1)
-            # y_gt = batched_data.y.view(-1)
-            y_gt = batched_data.y[:, 0]
+            y_gt = batched_data.y.view(-1)
+            # y_gt = batched_data.y[:, 0]
             loss = self.loss_fn(y_hat, y_gt)
         self.log('train_loss', loss, sync_dist=True)
         return loss
@@ -257,8 +258,8 @@ class Graphormer(pl.LightningModule):
     def validation_step(self, batched_data, batch_idx):
         if self.dataset_name in ['PCQM4M-LSC', 'ZINC']:
             y_pred = self(batched_data).view(-1)
-            # y_true = batched_data.y.view(-1)
-            y_true = batched_data.y[:, 0]
+            y_true = batched_data.y.view(-1)
+            # y_true = batched_data.y[:, 0]
         else:
             y_pred = self(batched_data)
             y_true = batched_data.y[:, 0:1]
