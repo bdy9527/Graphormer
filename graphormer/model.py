@@ -46,6 +46,9 @@ class Graphormer(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
+        self.alpha = 0.1
+        self.beta = torch.nn.Parameter(torch.Tensor([1.]), requires_grad=True)
+
         self.num_heads = num_heads
         if dataset_name == 'ZINC':
             self.atom_encoder = nn.Embedding(64, hidden_dim, padding_idx=0)
@@ -113,6 +116,9 @@ class Graphormer(pl.LightningModule):
         attn_bias, rel_pos, x = batched_data.attn_bias, batched_data.rel_pos, batched_data.x
         in_degree, out_degree = batched_data.in_degree, batched_data.in_degree
         edge_input, attn_edge_type = batched_data.edge_input, batched_data.attn_edge_type
+        
+        # rf_pred
+        mgf_maccs_pred = batched_data.y[:, 2]
         # graph_attn_bias
         n_graph, n_node = x.size()[:2]
         graph_attn_bias = attn_bias.clone()
@@ -123,7 +129,7 @@ class Graphormer(pl.LightningModule):
         # [n_graph, n_node, n_node, n_head] -> [n_graph, n_head, n_node, n_node]
         rel_pos_bias = self.rel_pos_encoder(rel_pos).permute(0, 3, 1, 2)
         graph_attn_bias[:, :, 1:, 1:] = graph_attn_bias[:,
-                                                        :, 1:, 1:] + rel_pos_bias
+                                                        :, 1:, 1:] + rel_pos_bias  # spatial encoder
         # reset rel pos here
         t = self.graph_token_virtual_distance.weight.view(1, self.num_heads, 1)
         graph_attn_bias[:, :, 1:, 0] = graph_attn_bias[:, :, 1:, 0] + t
@@ -155,7 +161,7 @@ class Graphormer(pl.LightningModule):
                 attn_edge_type).mean(-2).permute(0, 3, 1, 2)
 
         graph_attn_bias[:, :, 1:, 1:] = graph_attn_bias[:,
-                                                        :, 1:, 1:] + edge_input
+                                                        :, 1:, 1:] + edge_input  # edge encoder
         graph_attn_bias = graph_attn_bias + attn_bias.unsqueeze(1)  # reset
 
         # node feauture + graph token
@@ -166,7 +172,7 @@ class Graphormer(pl.LightningModule):
 
         node_feature = node_feature + \
             self.in_degree_encoder(in_degree) + \
-            self.out_degree_encoder(out_degree)
+            self.out_degree_encoder(out_degree)  # degree encoder
         graph_token_feature = self.graph_token.weight.unsqueeze(
             0).repeat(n_graph, 1, 1)
         graph_node_feature = torch.cat(
@@ -183,18 +189,31 @@ class Graphormer(pl.LightningModule):
             # get whole graph rep
             output = self.out_proj(output[:, 0, :])
         else:
-            output = self.downstream_out_proj(output[:, 0, :])
+            output = self.downstream_out_proj(output[:, 0, :])  # virtual node
+            # graph_pred =  torch.sigmoid(output)
+            # mgf_maccs_pred = torch.sigmoid(mgf_maccs_pred)
+
+            # h_graph_final = torch.cat((graph_pred, mgf_maccs_pred.reshape(-1,1)), 1)
+            # att = torch.nn.functional.softmax(h_graph_final * self.beta, -1)
+            # output = torch.sum(h_graph_final * att, -1).reshape(-1,1)
+
+            if self.dataset_name == 'ogbg-molhiv':
+                output = torch.sigmoid(output)
+                mgf_maccs_pred = torch.sigmoid(mgf_maccs_pred)
+                output = torch.clamp((1 - self.alpha) * output + self.alpha * mgf_maccs_pred.reshape(-1,1), min=0, max=1)
         return output
 
     def training_step(self, batched_data, batch_idx):
         if self.dataset_name == 'ogbg-molpcba':
             if not self.flag:
                 y_hat = self(batched_data).view(-1)
-                y_gt = batched_data.y.view(-1).float()
+                # y_gt = batched_data.y.view(-1).float()
+                y_gt = batched_data.y[:, 0].float()
                 mask = ~torch.isnan(y_gt)
                 loss = self.loss_fn(y_hat[mask], y_gt[mask])
             else:
-                y_gt = batched_data.y.view(-1).float()
+                # y_gt = batched_data.y.view(-1).float()
+                y_gt = batched_data.y[:, 0].float()
                 mask = ~torch.isnan(y_gt)
 
                 def forward(perturb): return self(batched_data, perturb)
@@ -208,13 +227,15 @@ class Graphormer(pl.LightningModule):
                                        m=self.flag_m, step_size=self.flag_step_size, mag=self.flag_mag, mask=mask)
                 self.lr_schedulers().step()
 
-        elif self.dataset_name == 'ogbg-molhiv':
+        elif self.dataset_name == 'ogbg-molhiv':  # batched_data.y[:,0]
             if not self.flag:
                 y_hat = self(batched_data).view(-1)
-                y_gt = batched_data.y.view(-1).float()
+                # y_gt = batched_data.y.view(-1).float()
+                y_gt = batched_data.y[:, 0].float()
                 loss = self.loss_fn(y_hat, y_gt)
             else:
-                y_gt = batched_data.y.view(-1).float()
+                # y_gt = batched_data.y.view(-1).float()
+                y_gt = batched_data.y[:, 0].float()
                 def forward(perturb): return self(batched_data, perturb)
                 model_forward = (self, forward)
                 n_graph, n_node = batched_data.x.size()[:2]
@@ -227,7 +248,8 @@ class Graphormer(pl.LightningModule):
                 self.lr_schedulers().step()
         else:
             y_hat = self(batched_data).view(-1)
-            y_gt = batched_data.y.view(-1)
+            # y_gt = batched_data.y.view(-1)
+            y_gt = batched_data.y[:, 0]
             loss = self.loss_fn(y_hat, y_gt)
         self.log('train_loss', loss, sync_dist=True)
         return loss
@@ -235,10 +257,13 @@ class Graphormer(pl.LightningModule):
     def validation_step(self, batched_data, batch_idx):
         if self.dataset_name in ['PCQM4M-LSC', 'ZINC']:
             y_pred = self(batched_data).view(-1)
-            y_true = batched_data.y.view(-1)
+            # y_true = batched_data.y.view(-1)
+            y_true = batched_data.y[:, 0]
         else:
             y_pred = self(batched_data)
-            y_true = batched_data.y
+            y_true = batched_data.y[:, 0:1]
+            # y_pred = self(batched_data).view(-1)
+            # y_true = batched_data.y[:, 0]
         return {
             'y_pred': y_pred,
             'y_true': y_true,
@@ -265,7 +290,9 @@ class Graphormer(pl.LightningModule):
             y_true = batched_data.y.view(-1)
         else:
             y_pred = self(batched_data)
-            y_true = batched_data.y
+            y_true = batched_data.y[:, 0:1]
+            # y_pred = self(batched_data).view(-1)
+            # y_true = batched_data.y[:, 0]
         return {
             'y_pred': y_pred,
             'y_true': y_true,
