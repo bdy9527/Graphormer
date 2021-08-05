@@ -17,7 +17,7 @@ GINE-APPNP          | 6.1M    | 29.79      |
 Graphormer   | 119.5M  | **31.39**      |
 
 #### OGBG-MolHIV
-Method        | #params | test AP (%)|
+Method        | #params | test ROC-AUC (%)|
 --------------|---------|------------|
 GCN-GraphNorm          | 526K    | 78.83      |
 PNA          | 326K    | 79.05      |
@@ -25,10 +25,22 @@ PHC-GNN          | 111K    | 79.34      |
 DeeperGCN-FLAG          | 532K    | 79.42      |
 DGN          | 114K    | 79.70      |
 Graphormer   | 47.0M   | **80.51**      |
+Graphormer + FPs   | 47.0M   | **80.51**      |
+
+| Model                | Test ROC-AUC   | Valid ROC-AUC  | Parameters | Hardware          |
+| -------------------- | --------------- | --------------- | ---------- | ----------------- |
+| Graphormer + FPs | 0.8451 ± 0.0006 | 0.9132 ± 0.0010 | 47183040     | Tesla V100 (32GB) |
+
 
 ## Example Usage
 
 Prepare your pre-trained models following our paper ["Do Transformers Really Perform Bad for Graph Representation?"](https://arxiv.org/abs/2106.05234).
+
+```
+cd ../ogb-lsc
+bash lsc.sh
+```
+**The pre-trained model should be saved in `../../checkpoints/xxx.ckpt` manually.**
 
 Fine-tuning your pre-trained model on OGBG-MolPCBA:
 
@@ -36,11 +48,22 @@ Fine-tuning your pre-trained model on OGBG-MolPCBA:
 bash pcba.sh
 ```
 
-Fine-tuning your pre-trained model on OGBG-MolHIV:
+Fine-tuning your pre-trained model on OGBG-MolHIV with **FingerPrints**:
+
+First, you should generate fingerprints and train with random forest as mentioned in [《GMAN and bag of tricks for graph classification》](https://github.com/PierreHao/YouGraph/blob/main/report/GMAN%20and%20bag%20of%20tricks%20for%20graph%20classification.pdf).
+
+```
+python extract_fingerprint.py
+python random_forest.py
+```
+The random forest results will be saved in `../../rf_preds/rf_final_pred.npy`.
+
+Then, you can fine-tune our pre-trained model. we use fingerprints to smooth the final results like APPNP.
 
 ```
 bash hiv.sh
 ```
+You can change `seed` in `hiv.sh`, and run 10 times.
 
 ## Citation
 Please kindly cite this paper if you use the code:
