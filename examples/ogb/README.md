@@ -58,7 +58,7 @@ First, you should generate fingerprints and train with random forest as mentione
 python extract_fingerprint.py
 python random_forest.py
 ```
-The random forest results will be saved in `../../rf_preds/rf_final_pred.npy`.
+The random forest results will be saved in `../../rf_preds_hiv/rf_final_pred.npy`.
 
 Then, you can fine-tune our pre-trained model. we use fingerprints to smooth the final results like APPNP.
 
