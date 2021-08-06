@@ -38,15 +38,17 @@ Graphormer + FPs   | 47.0M   | **82.25**      |
 
 Prepare your pre-trained models following our paper ["Do Transformers Really Perform Bad for Graph Representation?"](https://arxiv.org/abs/2106.05234).
 
-```
-cd ../ogb-lsc
-bash lsc-hiv.sh
+```bash
+# Pre-train model for OGBG-Molhiv
+bash ../ogb-lsc/lsc-hiv.sh
+# Pre-train model for OGBG-Molhiv
+bash ../ogb-lsc/lsc-pcba.sh
 ```
 **The pre-trained model should be saved in `../../checkpoints/xxx.ckpt` manually.**
 
 Fine-tuning your pre-trained model on OGBG-MolPCBA:
 
-```
+```bash
 bash pcba.sh
 ```
 
@@ -54,7 +56,7 @@ Fine-tuning your pre-trained model on OGBG-MolHIV with **FingerPrints**:
 
 First, you should generate fingerprints and train with random forest as mentioned in [《Extended-Connectivity Fingerprints》](https://pubs.acs.org/doi/10.1021/ci100050t) and [《GMAN and bag of tricks for graph classification》](https://github.com/PierreHao/YouGraph/blob/main/report/GMAN%20and%20bag%20of%20tricks%20for%20graph%20classification.pdf).
 
-```
+```bash
 python extract_fingerprint.py
 python random_forest.py
 ```
@@ -62,14 +64,14 @@ The random forest results will be saved in `../../rf_preds_hiv/rf_final_pred.npy
 
 Then, you can fine-tune our pre-trained model. we use fingerprints to smooth the final results like APPNP.
 
-```
+```bash
 bash hiv.sh
 ```
 You can change `seed` in `hiv.sh`, and run 10 times.
 
 Some hyper-parameters:
 
-```
+```bash
 Namespace(accelerator='ddp', accumulate_grad_batches=1, amp_backend='native', amp_level='O2', attention_dropout_rate=0.1, auto_lr_find=False, auto_scale_batch_size=False, auto_select_gpus=False, batch_size=128, benchmark=False, check_val_every_n_epoch=1, checkpoint_callback=True, checkpoint_path='../../checkpoints/PCQM4M-LSC-epoch=192-valid_mae=0.1298.ckpt', dataset_name='ogbg-molhiv', default_root_dir='../../exps/hiv/hiv_flag/4', deterministic=False, distributed_backend=None, dropout_rate=0.1, edge_type='multi_hop', end_lr=1e-09, fast_dev_run=False, ffn_dim=768, flag=True, flag_m=2, flag_mag=0.0, flag_step_size=0.2, flush_logs_every_n_steps=100, gpus=2, gradient_clip_algorithm='norm', gradient_clip_val=0.0, hidden_dim=768, intput_dropout_rate=0.0, limit_predict_batches=1.0, limit_test_batches=1.0, limit_train_batches=1.0, limit_val_batches=1.0, log_every_n_steps=50, log_gpu_memory=None, logger=True, max_epochs=6, max_steps=645, max_time=None, min_epochs=None, min_steps=None, move_metrics_to_cpu=False, multi_hop_max_dist=5, multiple_trainloader_mode='max_size_cycle', n_layers=12, num_heads=32, num_nodes=1, num_processes=1, num_sanity_val_steps=2, num_workers=8, overfit_batches=0.0, peak_lr=0.0002, plugins=None, precision=16, prepare_data_per_node=True, process_position=0, profiler=None, progress_bar_refresh_rate=10, rel_pos_max=1024, reload_dataloaders_every_epoch=False, replace_sampler_ddp=True, resume_from_checkpoint=None, seed=4, stochastic_weight_avg=False, sync_batchnorm=False, terminate_on_nan=False, test=False, tot_updates=644, tpu_cores=None, track_grad_norm=-1, truncated_bptt_steps=None, val_check_interval=1.0, validate=False, warmup_updates=64, weight_decay=0.0, weights_save_path=None, weights_summary='top')
 ```
 
