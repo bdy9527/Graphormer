@@ -15,7 +15,7 @@ echo "==========================================================================
 default_root_dir="../../exps/pcq/$exp_name/$seed"
 mkdir -p $default_root_dir
 n_gpu=$(nvidia-smi -L | wc -l)
-max_epochs=201
+max_epochs=301
 
 python ../../graphormer/entry.py --num_workers 8 --seed $seed --batch_size $batch_size \
       --dataset_name PCQM4M-LSC \
