@@ -40,7 +40,7 @@ Prepare your pre-trained models following our paper ["Do Transformers Really Per
 
 ```
 cd ../ogb-lsc
-bash lsc.sh
+bash lsc-hiv.sh
 ```
 **The pre-trained model should be saved in `../../checkpoints/xxx.ckpt` manually.**
 
