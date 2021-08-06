@@ -41,7 +41,7 @@ Prepare your pre-trained models following our paper ["Do Transformers Really Per
 ```bash
 # Pre-train model for OGBG-Molhiv
 bash ../ogb-lsc/lsc-hiv.sh
-# Pre-train model for OGBG-Molhiv
+# Pre-train model for OGBG-Molpcba
 bash ../ogb-lsc/lsc-pcba.sh
 ```
 **The pre-trained model should be saved in `../../checkpoints/xxx.ckpt` manually.**
