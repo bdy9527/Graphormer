@@ -52,7 +52,7 @@ bash pcba.sh
 
 Fine-tuning your pre-trained model on OGBG-MolHIV with **FingerPrints**:
 
-First, you should generate fingerprints and train with random forest as mentioned in [《GMAN and bag of tricks for graph classification》](https://github.com/PierreHao/YouGraph/blob/main/report/GMAN%20and%20bag%20of%20tricks%20for%20graph%20classification.pdf).
+First, you should generate fingerprints and train with random forest as mentioned in [《Extended-Connectivity Fingerprints》](https://pubs.acs.org/doi/10.1021/ci100050t) and [《GMAN and bag of tricks for graph classification》](https://github.com/PierreHao/YouGraph/blob/main/report/GMAN%20and%20bag%20of%20tricks%20for%20graph%20classification.pdf).
 
 ```
 python extract_fingerprint.py
