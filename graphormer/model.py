@@ -208,13 +208,13 @@ class Graphormer(pl.LightningModule):
         if self.dataset_name == 'ogbg-molpcba':
             if not self.flag:
                 y_hat = self(batched_data).view(-1)
-                # y_gt = batched_data.y.view(-1).float()
-                y_gt = batched_data.y[:, 0].float()
+                y_gt = batched_data.y.view(-1).float()
+                # y_gt = batched_data.y[:, 0].float()
                 mask = ~torch.isnan(y_gt)
                 loss = self.loss_fn(y_hat[mask], y_gt[mask])
             else:
-                # y_gt = batched_data.y.view(-1).float()
-                y_gt = batched_data.y[:, 0].float()
+                y_gt = batched_data.y.view(-1).float()
+                # y_gt = batched_data.y[:, 0].float()
                 mask = ~torch.isnan(y_gt)
 
                 def forward(perturb): return self(batched_data, perturb)
@@ -261,8 +261,12 @@ class Graphormer(pl.LightningModule):
             y_true = batched_data.y.view(-1)
             # y_true = batched_data.y[:, 0]
         else:
-            y_pred = self(batched_data)
-            y_true = batched_data.y[:, 0:1]
+            if self.dataset_name == 'ogbg-molhiv':
+                y_pred = self(batched_data)
+                y_true = batched_data.y[:, 0:1]
+            else:
+                y_pred = self(batched_data)
+                y_true = batched_data.y
             # y_pred = self(batched_data).view(-1)
             # y_true = batched_data.y[:, 0]
         return {
@@ -290,8 +294,12 @@ class Graphormer(pl.LightningModule):
             y_pred = self(batched_data).view(-1)
             y_true = batched_data.y.view(-1)
         else:
-            y_pred = self(batched_data)
-            y_true = batched_data.y[:, 0:1]
+            if self.dataset_name == 'ogbg-molhiv':
+                y_pred = self(batched_data)
+                y_true = batched_data.y[:, 0:1]
+            else:
+                y_pred = self(batched_data)
+                y_true = batched_data.y
             # y_pred = self(batched_data).view(-1)
             # y_true = batched_data.y[:, 0]
         return {

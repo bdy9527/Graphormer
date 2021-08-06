@@ -109,14 +109,22 @@ def main(args):
             # save pred
             all_prob = np.array(rf.predict_proba(X))
             print(all_prob.shape)
-            os.makedirs('../rf_preds', exist_ok=True)
-            np.save("../rf_preds/rf_pred_auc_{:0.4f}_{:0.4f}.npy".format(all_rocs[val_key], all_rocs[test_key]), all_prob)
+            if args.dataset_name == 'ogbg-molhiv':
+                os.makedirs('../rf_preds_hiv', exist_ok=True)
+                np.save("../rf_preds_hiv/rf_pred_auc_{:0.4f}_{:0.4f}.npy".format(all_rocs[val_key], all_rocs[test_key]), all_prob)
+            elif args.dataset_name == 'ogbg-molpcba':
+                os.makedirs('../rf_preds_pcba', exist_ok=True)
+                np.save("../rf_preds_pcba/rf_pred_auc_{:0.4f}_{:0.4f}.npy".format(all_rocs[val_key], all_rocs[test_key]), all_prob)
 
     final_index = np.argmax(eval_scores)
     best_val_score = eval_scores[final_index]
     final_test_score = test_scores[final_index]
-    shutil.copy2("../rf_preds/rf_pred_auc_{:0.4f}_{:0.4f}.npy".format(best_val_score, final_test_score), '../rf_preds/rf_final_pred.npy')
-    print("Best preds saved in ../rf_preds/rf_final_pred.npy")
+    if args.dataset_name == 'ogbg-molhiv':
+        shutil.copy2("../rf_preds_hiv/rf_pred_auc_{:0.4f}_{:0.4f}.npy".format(best_val_score, final_test_score), '../rf_preds_hiv/rf_final_pred.npy')
+        print("Best preds saved in ../rf_preds_hiv/rf_final_pred.npy")
+    elif args.dataset_name == 'ogbg-molpcba':
+        shutil.copy2("../rf_preds_pcba/rf_pred_auc_{:0.4f}_{:0.4f}.npy".format(best_val_score, final_test_score), '../rf_preds_pcba/rf_final_pred.npy')
+        print("Best preds saved in ../rf_preds_pcba/rf_final_pred.npy")
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description='gnn')

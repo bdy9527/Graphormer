@@ -109,7 +109,7 @@ class GraphDataModule(LightningDataModule):
             split_idx = self.dataset['dataset'].get_idx_split()
 
             if self.dataset_name == 'ogbg-molhiv':
-                mgf_maccs_pred = np.load('../../rf_preds/rf_final_pred.npy')
+                mgf_maccs_pred = np.load('../../rf_preds_hiv/rf_final_pred.npy')
                 self.dataset['dataset'].data.y = torch.cat((self.dataset['dataset'].data.y, torch.from_numpy(mgf_maccs_pred)), 1)
 
             self.dataset_train = self.dataset['dataset'][split_idx["train"]]
