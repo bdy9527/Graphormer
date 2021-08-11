@@ -198,10 +198,10 @@ class Graphormer(pl.LightningModule):
             # att = torch.nn.functional.softmax(h_graph_final * self.beta, -1)
             # output = torch.sum(h_graph_final * att, -1).reshape(-1,1)
 
-            # if self.dataset_name == 'ogbg-molhiv':
-            #     output = torch.sigmoid(output)
-            #     mgf_maccs_pred = torch.sigmoid(mgf_maccs_pred)
-            #     output = torch.clamp((1 - self.alpha) * output + self.alpha * mgf_maccs_pred.reshape(-1,1), min=0, max=1)
+            if self.dataset_name == 'ogbg-molhiv':
+                output = torch.sigmoid(output)
+                mgf_maccs_pred = torch.sigmoid(mgf_maccs_pred)
+                output = torch.clamp((1 - self.alpha) * output + self.alpha * mgf_maccs_pred.reshape(-1,1), min=0, max=1)
         return output
 
     def training_step(self, batched_data, batch_idx):
