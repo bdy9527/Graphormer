@@ -3,7 +3,7 @@
 #!/usr/bin/env bash
 
 [ -z "${exp_name}" ] && exp_name="hiv_flag"
-[ -z "${seed}" ] && seed="3"
+[ -z "${seed}" ] && seed="1"
 [ -z "${arch}" ] && arch="--ffn_dim 768 --hidden_dim 768 --intput_dropout_rate 0.0 --attention_dropout_rate 0.1 --dropout_rate 0.1 --weight_decay 0.0 --n_layers 12 --edge_type multi_hop --multi_hop_max_dist 5"
 [ -z "${batch_size}" ] && batch_size="128"         # Alternatively, you can decrease the bsz to 64 and use 2 GPUs, if you do not have 32G GPU memory.
 [ -z "${epoch}" ] && epoch="5"
@@ -14,7 +14,7 @@
 [ -z "${flag_step_size}" ] && flag_step_size="0.2"
 [ -z "${flag_mag}" ] && flag_mag="0"
 
-[ -z "${ckpt_path}" ] && ckpt_path="../../checkpoints/PCQM4M-LSC-epoch=192-valid_mae=0.1298.ckpt"
+[ -z "${ckpt_path}" ] && ckpt_path="../../checkpoints/epoch=200-step=298886.ckpt"
 
 echo -e "\n\n"
 echo "=====================================ARGS======================================"
