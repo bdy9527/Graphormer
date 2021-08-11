@@ -83,7 +83,10 @@ def gen_edge_input(max_dist, path, edge_feat):
                 continue
             if path_copy[i][j] == 510:
                 continue
+            # if path_copy[i][j] == 0:
+            #     continue
             path = [i] + get_all_edges(path_copy, i, j) + [j]
+            # path = [i] + [j]
             num_path = len(path) - 1
             for k in range(num_path):
                 edge_fea_all[i, j, k, :] = edge_feat_copy[path[k], path[k+1], :]

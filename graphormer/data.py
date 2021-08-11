@@ -111,6 +111,9 @@ class GraphDataModule(LightningDataModule):
             if self.dataset_name == 'ogbg-molhiv':
                 mgf_maccs_pred = np.load('../../rf_preds_hiv/rf_final_pred.npy')
                 self.dataset['dataset'].data.y = torch.cat((self.dataset['dataset'].data.y, torch.from_numpy(mgf_maccs_pred)), 1)
+            # elif self.dataset_name == 'ogbg-molpcba':
+            #     mgf_maccs_pred = np.load('../../rf_preds_pcba/rf_final_pred.npy')
+            #     self.dataset['dataset'].data.y = torch.cat((self.dataset['dataset'].data.y, torch.from_numpy(mgf_maccs_pred)), 1)
 
             self.dataset_train = self.dataset['dataset'][split_idx["train"]]
             self.dataset_val = self.dataset['dataset'][split_idx["valid"]]

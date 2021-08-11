@@ -38,8 +38,11 @@ def preprocess_item(item):
 
     shortest_path_result, path = algos.floyd_warshall(adj.numpy())
     max_dist = np.amax(shortest_path_result)
+    # max_dist = 1
     edge_input = algos.gen_edge_input(max_dist, path, attn_edge_type.numpy())
+    # edge_input = algos.gen_edge_input(max_dist, adj.numpy(), attn_edge_type.numpy())
     rel_pos = torch.from_numpy((shortest_path_result)).long()
+    # rel_pos = torch.from_numpy((adj.numpy())).long()
     attn_bias = torch.zeros(
         [N + 1, N + 1], dtype=torch.float)  # with graph token
 

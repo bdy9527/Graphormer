@@ -198,23 +198,23 @@ class Graphormer(pl.LightningModule):
             # att = torch.nn.functional.softmax(h_graph_final * self.beta, -1)
             # output = torch.sum(h_graph_final * att, -1).reshape(-1,1)
 
-            if self.dataset_name == 'ogbg-molhiv':
-                output = torch.sigmoid(output)
-                mgf_maccs_pred = torch.sigmoid(mgf_maccs_pred)
-                output = torch.clamp((1 - self.alpha) * output + self.alpha * mgf_maccs_pred.reshape(-1,1), min=0, max=1)
+            # if self.dataset_name == 'ogbg-molhiv':
+            #     output = torch.sigmoid(output)
+            #     mgf_maccs_pred = torch.sigmoid(mgf_maccs_pred)
+            #     output = torch.clamp((1 - self.alpha) * output + self.alpha * mgf_maccs_pred.reshape(-1,1), min=0, max=1)
         return output
 
     def training_step(self, batched_data, batch_idx):
         if self.dataset_name == 'ogbg-molpcba':
             if not self.flag:
                 y_hat = self(batched_data).view(-1)
-                y_gt = batched_data.y.view(-1).float()
-                # y_gt = batched_data.y[:, 0].float()
+                # y_gt = batched_data.y.view(-1).float()
+                y_gt = batched_data.y[:, :128].reshape(-1, 1).view(-1).float()
                 mask = ~torch.isnan(y_gt)
                 loss = self.loss_fn(y_hat[mask], y_gt[mask])
             else:
-                y_gt = batched_data.y.view(-1).float()
-                # y_gt = batched_data.y[:, 0].float()
+                # y_gt = batched_data.y.view(-1).float()
+                y_gt = batched_data.y[:, :128].reshape(-1, 1).view(-1).float()
                 mask = ~torch.isnan(y_gt)
 
                 def forward(perturb): return self(batched_data, perturb)
@@ -266,7 +266,7 @@ class Graphormer(pl.LightningModule):
                 y_true = batched_data.y[:, 0:1]
             else:
                 y_pred = self(batched_data)
-                y_true = batched_data.y
+                y_true = batched_data.y[:, 0:128]
             # y_pred = self(batched_data).view(-1)
             # y_true = batched_data.y[:, 0]
         return {
@@ -277,17 +277,17 @@ class Graphormer(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         y_pred = torch.cat([i['y_pred'] for i in outputs])
         y_true = torch.cat([i['y_true'] for i in outputs])
-        if self.dataset_name == 'ogbg-molpcba':
-            mask = ~torch.isnan(y_true)
-            loss = self.loss_fn(y_pred[mask], y_true[mask])
-            self.log('valid_ap', loss, sync_dist=True)
-        else:
-            input_dict = {"y_true": y_true, "y_pred": y_pred}
-            try:
-                self.log('valid_' + self.metric, self.evaluator.eval(input_dict)
-                         [self.metric], sync_dist=True)
-            except:
-                pass
+        # if self.dataset_name == 'ogbg-molpcba':
+        #     mask = ~torch.isnan(y_true)
+        #     loss = self.loss_fn(y_pred[mask], y_true[mask])
+        #     self.log('valid_ap', loss, sync_dist=True)
+        # else:
+        input_dict = {"y_true": y_true, "y_pred": y_pred}
+        try:
+            self.log('valid_' + self.metric, self.evaluator.eval(input_dict)
+                        [self.metric], sync_dist=True)
+        except:
+            pass
 
     def test_step(self, batched_data, batch_idx):
         if self.dataset_name in ['PCQM4M-LSC', 'ZINC']:
@@ -299,7 +299,7 @@ class Graphormer(pl.LightningModule):
                 y_true = batched_data.y[:, 0:1]
             else:
                 y_pred = self(batched_data)
-                y_true = batched_data.y
+                y_true = batched_data.y[:, 0:128]
             # y_pred = self(batched_data).view(-1)
             # y_true = batched_data.y[:, 0]
         return {
@@ -363,6 +363,7 @@ class Graphormer(pl.LightningModule):
         parser.add_argument('--flag_m', type=int, default=3)
         parser.add_argument('--flag_step_size', type=float, default=1e-3)
         parser.add_argument('--flag_mag', type=float, default=1e-3)
+        parser.add_argument('--use_fps', type=bool, default=True)
         return parent_parser
 
 
