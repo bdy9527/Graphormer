@@ -47,7 +47,7 @@ class Graphormer(pl.LightningModule):
         self.save_hyperparameters()
 
         self.alpha = 0.1
-        self.beta = torch.nn.Parameter(torch.Tensor([1.]), requires_grad=True)
+        self.beta = torch.nn.Parameter(torch.Tensor([1.]), requires_grad=True)   # do not use, like a temperature
 
         self.num_heads = num_heads
         if dataset_name == 'ZINC':
