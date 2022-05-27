@@ -185,6 +185,9 @@ class Graphormer(pl.LightningModule):
             output = enc_layer(output, graph_attn_bias)
         output = self.final_ln(output)
 
+        # Input dropout
+        # LayerNorm before classification
+
         # output part
         if self.dataset_name == 'PCQM4M-LSC':
             # get whole graph rep
@@ -375,6 +378,8 @@ class FeedForwardNetwork(nn.Module):
         self.gelu = nn.GELU()
         self.layer2 = nn.Linear(ffn_size, hidden_size)
 
+    # Activation GELU()
+        
     def forward(self, x):
         x = self.layer1(x)
         x = self.gelu(x)
@@ -446,6 +451,9 @@ class EncoderLayer(nn.Module):
         self.ffn_norm = nn.LayerNorm(hidden_size)
         self.ffn = FeedForwardNetwork(hidden_size, ffn_size, dropout_rate)
         self.ffn_dropout = nn.Dropout(dropout_rate)
+        
+    # LayerNorm   self_attention_norm & ffn_norm
+    # Add & Norm  x' = x + dropout(sublayer(norm(x)))
 
     def forward(self, x, attn_bias=None):
         y = self.self_attention_norm(x)
