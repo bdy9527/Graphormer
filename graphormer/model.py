@@ -141,12 +141,12 @@ class Graphormer(pl.LightningModule):
             rel_pos_ = rel_pos.clone()
             rel_pos_[rel_pos_ == 0] = 1  # set pad to 1
             # set 1 to 1, x > 1 to x - 1
-            rel_pos_ = torch.where(rel_pos_ > 1, rel_pos_ - 1, rel_pos_)
+            rel_pos_ = torch.where(rel_pos_ > 1, rel_pos_ - 1, rel_pos_)               # do not understand
             if self.multi_hop_max_dist > 0:
                 rel_pos_ = rel_pos_.clamp(0, self.multi_hop_max_dist)
                 edge_input = edge_input[:, :, :, :self.multi_hop_max_dist, :]
             # [n_graph, n_node, n_node, max_dist, n_head]
-            edge_input = self.edge_encoder(edge_input).mean(-2)    # .mean seems wrong
+            edge_input = self.edge_encoder(edge_input).mean(-2)                        # .mean seems wrong
             max_dist = edge_input.size(-2)
             edge_input_flat = edge_input.permute(
                 3, 0, 1, 2, 4).reshape(max_dist, -1, self.num_heads)
