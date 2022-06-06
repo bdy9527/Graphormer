@@ -146,7 +146,7 @@ class Graphormer(pl.LightningModule):
                 rel_pos_ = rel_pos_.clamp(0, self.multi_hop_max_dist)
                 edge_input = edge_input[:, :, :, :self.multi_hop_max_dist, :]
             # [n_graph, n_node, n_node, max_dist, n_head]
-            edge_input = self.edge_encoder(edge_input).mean(-2)
+            edge_input = self.edge_encoder(edge_input).mean(-2)    # .mean seems wrong
             max_dist = edge_input.size(-2)
             edge_input_flat = edge_input.permute(
                 3, 0, 1, 2, 4).reshape(max_dist, -1, self.num_heads)
